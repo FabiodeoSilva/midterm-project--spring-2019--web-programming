@@ -109,8 +109,8 @@ function addBRFScript() {
 
 let brfv4Example = { stats: {} };
 let brfv4BaseURL = _isWebAssemblySupported
-  ? "js/libs/brf_wasm/"
-  : "js/libs/brf_asmjs/";
+  ? "libs/brf_wasm/"
+  : "libs/brf_asmjs/";
 let brfv4SDKName = "BRFv4_JS_TK101018_v4.1.0_trial"; // the currently available library
 let brfv4WASMBuffer = null;
 
@@ -314,7 +314,7 @@ function initExample() {
 
     if (brfv4 && brfv4.sdkReady) {
       let s2 = document.createElement("script");
-      s2.setAttribute("src", "draw.js");
+      s2.setAttribute("src", "sketch.js");
       document.querySelector("body").append(s2);
 
       initSDK();
