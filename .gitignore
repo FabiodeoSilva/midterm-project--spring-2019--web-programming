@@ -763,3 +763,5 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+# production folder
+prod/*
