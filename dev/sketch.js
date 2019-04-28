@@ -39,41 +39,6 @@ function stopEyes(brfv4, faces, d, img) {
   basicAR(brfv4, faces, d, img, noEyes);
 }
 
-/*function getWebcamVid(xx, yy, faces, d, img){
-    
-    d.clear();
-    let  frame = d.createImage(webcam.videoWidth, webcam.videoHeight);
-    let  i = null;
-    frame.loadPixels();
-    for(let  y = 0; y <  webcam.videoHeight; y++) {
-      for(let  x = 0; x <  webcam.videoWidth; x++) { 
-          i = (x + (y * webcam.videoWidth))*4;
-          frame.set(x, y, [img[i], img[i+1], img[i+2], img[i+3]]); 
-        }
-      }
-    frame.updatePixels();
-    
-    arAdapter(x, y, faces);
-    d.image(frame, xx, yy);
-    
-}
-
-function arAdapter(x, y, faces){
-
-    for(let  i = 0; i < faces.length; i++) {
-
-        let  face = faces[i];
-     
-        for(let j = 0; j<= face.vertices.length; j+=2){
-
-           // face.vertices[j] += x;
-            //face.vertices[j+1] += y;
-        }
-    }
-    
-    
-}*/
-
 function onFace(brfv4, faces, d, img, func) {
   for (let i = 0; i < faces.length; i++) {
     let face = faces[i];
