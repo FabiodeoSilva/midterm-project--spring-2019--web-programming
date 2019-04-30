@@ -6,15 +6,24 @@ document.querySelector("canvas#_imageData").style.display = "none";
 let webcamH = document.getElementById("_imageData").height;
 let webcamW = document.getElementById("_imageData").width;
 
-class Frame {
-  constructor() {
-    this.screens = [manyEyes];
+class Imine {
+  constructor(periodSecs, screens, order = null) {
+    this.period = periodSecs;
+    this.screens = screens;
     this.currSec = 0;
     this.draw = this.screens[0];
+    this.periodMultiplier = 1;
+    this.currScreen = 0;
+    this.order = order;
+    this.orderIndex = 0;
   }
   setTimer() {
     this.timer = setInterval(() => {
-      console.log(this.currSec);
+      //determines the beginning of every period
+      if (this.currSec == this.period * this.periodMultiplier) {
+        this.nextScreen();
+        this.periodMultiplier++;
+      }
       this.currSec++;
     }, 1000);
   }
@@ -22,15 +31,26 @@ class Frame {
     clearInterval(this.timer);
     this.currSec = 0;
   }
+
   init() {
     this.setTimer();
+    this.rand();
   }
+
   rand() {
     this.draw = this.screens[Math.floor(Math.random() * this.screens.length)];
   }
+  nextScreen() {
+    if (this.order) {
+      this.draw = this.screens[this.order[this.orderIndex]];
+      this.orderIndex++;
+    } else {
+      this.rand();
+    }
+  }
 }
 
-let mainCanvas = new Frame();
+let mainCanvas = new Imine(2, [stopMouth, cyclops, manyEyes]);
 mainCanvas.init();
 
 handleTrackingResults = function(brfv4, faces, d, img) {
