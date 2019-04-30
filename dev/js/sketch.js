@@ -48,9 +48,10 @@ let goldenRatio = (brfv4, faces, d, img) => {
     d.noFill();
     d.rect(
       face.vertices[0], 
-      face.vertices[39] - face.vertices[1], 
-      face.vertices[32] -face.vertices[0], 
+      face.vertices[39], 
+      face.vertices[32] - face.vertices[0], 
       face.vertices[39] - face.vertices[17]);
+      d.line(face.vertices[48],face.vertices[49], face.vertices[16], face.vertices[17] )
    /* d.rect(
     face.vertices[0], 
     face.vertices[9], 
@@ -63,6 +64,16 @@ let goldenRatio = (brfv4, faces, d, img) => {
       (face.vertices[39] - face.vertices[17])/2);*/
 });
 
+}
+let numberOnFace = (brfv4, faces, d, img) => {
+
+  basicAR(brfv4,  faces,  d,  img, (face, d) => {
+    for(let i = 0; i <= face.vertices.length-1; i++){
+      console.log(i);
+      d.textSize(30);
+      d.text(random(1, 10), face.vertices[i*8], face.vertices[(i*8)+1]);
+    }
+  });
 }
 
 let faceCoor = [
@@ -95,7 +106,30 @@ let lineForms = (brfv4, faces, d, img) =>{
     }
   });
 }
+let o = 0;
 
+let drawLine = (brfv4,  faces,  d,  img) =>{
+  basicAR(brfv4,  faces,  d,  img, (face, d)=>{  
+   
+    d.ellipse(face.vertices[0*2], face.vertices[(0*2)+1], 10, 10);
+    d.ellipse(face.vertices[17*2], face.vertices[(17*2)+1], 10, 10);
+
+
+    if((face.vertices[(0*2)])+o <= face.vertices[(17*2)]) {
+
+      d.line (
+      face.vertices[0*2],
+      face.vertices[(0*2)+1],
+      face.vertices[0*2]+o,
+      face.vertices[(0*2)+1]-o);
+
+     o += 0.5;
+    } else{
+      d.line (face.vertices[0*2], face.vertices[(0*2)+1], face.vertices[36*2], face.vertices[(36*2)+1]);
+    }
+  
+  });
+}
 
 let stopMouth = (brfv4, faces, d, img) => {
   basicAR(brfv4, faces, d, img, noMouth);
@@ -138,24 +172,16 @@ function cyclops(brfv4, faces, d, img) {
     ) {
       eye = d.get(face.vertices[72] - 5, face.vertices[72 + 1] - 10, 45, 20);
 
-      // skin = d.get(face.vertices[54], face.vertices[54 + 1] - 50, 40, 20);
+      skin = d.get(face.vertices[54], face.vertices[54 + 1] - 50, 40, 20);
 
       d.image(eye, face.vertices[54] - 27, face.vertices[54 + 1] - 50);
 
-      //d.image(skin, face.vertices[72] - 10, face.vertices[72 + 1] - 10);
-      //d.image(skin, face.vertices[84] - 10, face.vertices[84 + 1] - 10);
+      d.image(skin, face.vertices[72] - 10, face.vertices[72 + 1] - 10);
+      d.image(skin, face.vertices[84] - 10, face.vertices[84 + 1] - 10);
 
       /*  anonymous eyes
                d.rect(face.vertices[72] - 10, face.vertices[72 + 1] - 20, 150, 40);
                d.fill(0);*/
-
-      d.rect(
-        face.vertices[96] - 5,
-        face.vertices[100 + 1] - 20,
-        face.vertices[108] - face.vertices[96],
-        face.vertices[115] - face.vertices[103] + 10
-      );
-      d.fill(0);
     }
   }
 }
@@ -514,7 +540,7 @@ class Imine {
   }
 }
 
-let mainCanvas = new Imine(2, [goldenRatio]);
+let mainCanvas = new Imine(10, [manyEyes, stopEyes, stopMouth, lineForms, cyclops]);
 mainCanvas.init();
 
 /*Loop below: everytime the lib finds a face, it executes this callback*/
