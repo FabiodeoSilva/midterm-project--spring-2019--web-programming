@@ -50,15 +50,6 @@ class Imine {
   }
 }
 
-let mainCanvas = new Imine(2, [stopMouth, cyclops, manyEyes]);
-mainCanvas.init();
-
-handleTrackingResults = function(brfv4, faces, d, img) {
-  mainCanvas.draw(brfv4, faces, d, img);
-
-  d.redraw();
-};
-
 let getWebcamVid = (faces, d, img) => {
   d.loadPixels();
   for (let i = 0; i <= img.length; i++) {
@@ -67,13 +58,21 @@ let getWebcamVid = (faces, d, img) => {
   d.updatePixels();
 };
 
-function stopMouth(brfv4, faces, d, img) {
-  basicAR(brfv4, faces, d, img, noMouth);
-}
+/*Math Section*/
 
-function stopEyes(brfv4, faces, d, img) {
+let drawLine = (brfv4, faces, d, img) => {
+  basicAR(brfv4, faces, d, img, (face, d) => {
+    d.ellipse(face.vertices[96] - 5, face.vertices[100 + 1] - 20, 50, 50);
+  });
+};
+
+let stopMouth = (brfv4, faces, d, img) => {
+  basicAR(brfv4, faces, d, img, noMouth);
+};
+
+let stopEyes = (brfv4, faces, d, img) => {
   basicAR(brfv4, faces, d, img, noEyes);
-}
+};
 
 function onFace(brfv4, faces, d, img, func) {
   for (let i = 0; i < faces.length; i++) {
@@ -369,99 +368,6 @@ function smileCheck(brfv4, faces) {
   }
 }
 
-(function(lib) {
-  "use strict";
-
-  lib.BRFv4PointUtils = {
-    setPoint: function(v, i, p) {
-      p.x = v[i * 2];
-      p.y = v[i * 2 + 1];
-    },
-    applyMovementVector: function(p, p0, pmv, f) {
-      p.x = p0.x + pmv.x * f;
-      p.y = p0.y + pmv.y * f;
-    },
-    interpolatePoint: function(p, p0, p1, f) {
-      p.x = p0.x + f * (p1.x - p0.x);
-      p.y = p0.y + f * (p1.y - p0.y);
-    },
-    getAveragePoint: function(p, ar) {
-      p.x = 0.0;
-      p.y = 0.0;
-      for (let i = 0, l = ar.length; i < l; i++) {
-        p.x += ar[i].x;
-        p.y += ar[i].y;
-      }
-      p.x /= l;
-      p.y /= l;
-    },
-    calcMovementVector: function(p, p0, p1, f) {
-      p.x = f * (p1.x - p0.x);
-      p.y = f * (p1.y - p0.y);
-    },
-    calcMovementVectorOrthogonalCW: function(p, p0, p1, f) {
-      lib.BRFv4PointUtils.calcMovementVector(p, p0, p1, f);
-      let x = p.x;
-      let y = p.y;
-      p.x = -y;
-      p.y = x;
-    },
-    calcMovementVectorOrthogonalCCW: function(p, p0, p1, f) {
-      lib.BRFv4PointUtils.calcMovementVector(p, p0, p1, f);
-      let x = p.x;
-      let y = p.y;
-      p.x = y;
-      p.y = -x;
-    },
-    calcIntersectionPoint: function(p, pk0, pk1, pg0, pg1) {
-      //y1 = m1 * x1  + t1 ... y2 = m2 * x2 + t1
-      //m1 * x  + t1 = m2 * x + t2
-      //m1 * x - m2 * x = (t2 - t1)
-      //x * (m1 - m2) = (t2 - t1)
-
-      let dx1 = pk1.x - pk0.x;
-      if (dx1 == 0) dx1 = 0.01;
-      let dy1 = pk1.y - pk0.y;
-      if (dy1 == 0) dy1 = 0.01;
-
-      let dx2 = pg1.x - pg0.x;
-      if (dx2 == 0) dx2 = 0.01;
-      let dy2 = pg1.y - pg0.y;
-      if (dy2 == 0) dy2 = 0.01;
-
-      let m1 = dy1 / dx1;
-      let t1 = pk1.y - m1 * pk1.x;
-
-      let m2 = dy2 / dx2;
-      let t2 = pg1.y - m2 * pg1.x;
-
-      let m1m2 = m1 - m2;
-      if (m1m2 == 0) m1m2 = 0.01;
-      let t2t1 = t2 - t1;
-      if (t2t1 == 0) t2t1 = 0.01;
-      let px = t2t1 / m1m2;
-      let py = m1 * px + t1;
-
-      p.x = px;
-      p.y = py;
-    },
-    calcDistance: function(p0, p1) {
-      return Math.sqrt(
-        (p1.x - p0.x) * (p1.x - p0.x) + (p1.y - p0.y) * (p1.y - p0.y)
-      );
-    },
-    calcAngle: function(p0, p1) {
-      return Math.atan2(p1.y - p0.y, p1.x - p0.x);
-    },
-    toDegree: function(x) {
-      return (x * 180.0) / Math.PI;
-    },
-    toRadian: function(x) {
-      return (x * Math.PI) / 180.0;
-    }
-  };
-})(brfv4);
-
 let x = null;
 let y = null;
 let radius = 10;
@@ -544,3 +450,12 @@ function whiteNoise(brfv4, faces, d, img) {
   }
   d.updatePixels();
 }
+
+let mainCanvas = new Imine(2, [drawLine]);
+mainCanvas.init();
+
+handleTrackingResults = function(brfv4, faces, d, img) {
+  mainCanvas.draw(brfv4, faces, d, img);
+
+  d.redraw();
+};
