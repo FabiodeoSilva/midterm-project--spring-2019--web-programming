@@ -6,50 +6,20 @@ document.querySelector("canvas#_imageData").style.display = "none";
 let webcamH = document.getElementById("_imageData").height;
 let webcamW = document.getElementById("_imageData").width;
 
-class Imine {
-  constructor(periodSecs, screens, order = null) {
-    this.period = periodSecs;
-    this.screens = screens;
-    this.currSec = 0;
-    this.draw = this.screens[0];
-    this.periodMultiplier = 1;
-    this.currScreen = 0;
-    this.order = order;
-    this.orderIndex = 0;
-  }
-  setTimer() {
-    this.timer = setInterval(() => {
-      //determines the beginning of every period
-      if (this.currSec == this.period * this.periodMultiplier) {
-        this.nextScreen();
-        this.periodMultiplier++;
-      }
-      this.currSec++;
-    }, 1000);
-  }
-  killTimer() {
-    clearInterval(this.timer);
-    this.currSec = 0;
-  }
-
-  init() {
-    this.setTimer();
-    this.rand();
-  }
-
-  rand() {
-    this.draw = this.screens[Math.floor(Math.random() * this.screens.length)];
-  }
-  nextScreen() {
-    if (this.order) {
-      this.draw = this.screens[this.order[this.orderIndex]];
-      this.orderIndex++;
-    } else {
-      this.rand();
-    }
-  }
+function random(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
+
+let dist, point1x, point1y, point2x, point2y;  
+let eye, face, skin;
+let leftEye = null;
+let rightEye = null;
+
+
+/*loads every pixel from the webcam raw canvas to p5 canvas*/
 let getWebcamVid = (faces, d, img) => {
   d.loadPixels();
   for (let i = 0; i <= img.length; i++) {
@@ -59,12 +29,73 @@ let getWebcamVid = (faces, d, img) => {
 };
 
 /*Math Section*/
+let populateRandomLinesArray = (amount) =>{
+    let point1, point2;
+     randomLines = [];
+    for(let i = -3; i<= amount; i++){
+      point1 = Math.floor(random(0, 33));
+      point2 = Math.floor(random(34, 67));
+       randomLines.push(point1);
+       randomLines.push(point2);
+    }
+    return randomLines;
+}
 
-let drawLine = (brfv4, faces, d, img) => {
-  basicAR(brfv4, faces, d, img, (face, d) => {
-    d.ellipse(face.vertices[96] - 5, face.vertices[100 + 1] - 20, 50, 50);
+
+
+let goldenRatio = (brfv4, faces, d, img) => {
+  basicAR(brfv4,  faces,  d,  img, (face, d)=>{   
+    d.noFill();
+    d.rect(
+      face.vertices[0], 
+      face.vertices[39] - face.vertices[1], 
+      face.vertices[32] -face.vertices[0], 
+      face.vertices[39] - face.vertices[17]);
+   /* d.rect(
+    face.vertices[0], 
+    face.vertices[9], 
+    (face.vertices[32] - face.vertices[0])/2, 
+    (face.vertices[39] - face.vertices[17]));
+    d.rect(
+      face.vertices[0], 
+      face.vertices[9], 
+      (face.vertices[32] - face.vertices[0])/2, 
+      (face.vertices[39] - face.vertices[17])/2);*/
+});
+
+}
+
+let faceCoor = [
+  0, 8,
+  36, 45,
+  0, 15,
+  8, 15,
+  27, 8,
+  48, 54,
+  17, 26,
+  31, 35,
+  24, 44,
+  19, 38
+];      
+
+let lineForms = (brfv4, faces, d, img) =>{
+
+  basicAR(brfv4,  faces,  d,  img, (face, d)=>{   
+    for(let i = 0; i <= (faceCoor.length/2)-1; i++){
+
+      point1x = face.vertices[(faceCoor[i*2])*2];
+      point1y = face.vertices[((faceCoor[i*2]+1)*2)+1];
+
+      point2x = face.vertices[faceCoor[(i*2)+1]*2]; 
+      point2y = face.vertices[(faceCoor[(i*2)+1]*2)+1];
+
+      dist = Math.floor(d.dist( point1x, point1y, point2x, point2y));
+      d.text(dist, point1x + dist/2, point1y);
+      d.line(point1x, point1y, point2x, point2y);
+    }
   });
-};
+}
+
 
 let stopMouth = (brfv4, faces, d, img) => {
   basicAR(brfv4, faces, d, img, noMouth);
@@ -74,24 +105,11 @@ let stopEyes = (brfv4, faces, d, img) => {
   basicAR(brfv4, faces, d, img, noEyes);
 };
 
-function onFace(brfv4, faces, d, img, func) {
-  for (let i = 0; i < faces.length; i++) {
-    let face = faces[i];
-
-    if (
-      face.state === brfv4.BRFState.FACE_TRACKING_START ||
-      face.state === brfv4.BRFState.FACE_TRACKING
-    ) {
-      for (let k = 0; k < face.vertices.length; k += 2) {}
-    }
-  }
-}
-
 function basicAR(brfv4, faces, d, img, ...funcs) {
   getWebcamVid(faces, d, img);
 
   for (let i = 0; i < faces.length; i++) {
-    let face = faces[i];
+    face = faces[i];
 
     if (
       face.state === brfv4.BRFState.FACE_TRACKING_START ||
@@ -107,7 +125,7 @@ function basicAR(brfv4, faces, d, img, ...funcs) {
 function cyclops(brfv4, faces, d, img) {
   getWebcamVid(faces, d, img);
 
-  let eye = null,
+    eye = null,
     face = null,
     skin = null;
 
@@ -145,10 +163,10 @@ function cyclops(brfv4, faces, d, img) {
 function manyEyes(brfv4, faces, d, img) {
   getWebcamVid(faces, d, img);
 
-  let leftEye = null;
-  let rightEye = null;
+  leftEye = null;
+  rightEye = null;
 
-  let face = null;
+  face = null;
 
   for (let i = 0; i < faces.length; i++) {
     face = faces[i];
@@ -451,11 +469,59 @@ function whiteNoise(brfv4, faces, d, img) {
   d.updatePixels();
 }
 
-let mainCanvas = new Imine(2, [drawLine]);
+
+class Imine {
+  constructor(periodSecs, screens, order = null) {
+    this.period = periodSecs;
+    this.screens = screens;
+    this.currSec = 0;
+    this.draw = this.screens[0];
+    this.periodMultiplier = 1;
+    this.currScreen = 0;
+    this.order = order;
+    this.orderIndex = 0;
+  }
+  setTimer() {
+    this.timer = setInterval(() => {
+      //determines the beginning of every period in seconds
+      if (this.currSec == this.period * this.periodMultiplier) {
+       //visual effects change by each period
+        this.nextScreen();
+        this.periodMultiplier++;
+      }
+      this.currSec++;
+    }, 1000);
+  }
+  killTimer() {
+    clearInterval(this.timer);
+    this.currSec = 0;
+  }
+
+  init() {
+    this.setTimer();
+  }
+
+  rand() {
+    this.draw = this.screens[Math.floor(Math.random() * this.screens.length)];
+  }
+  nextScreen() {
+    if (this.order) {
+      this.draw = this.screens[this.order[this.orderIndex]];
+      this.orderIndex++;
+    } else {
+      this.rand();
+    }
+  }
+}
+
+let mainCanvas = new Imine(2, [goldenRatio]);
 mainCanvas.init();
 
+/*Loop below: everytime the lib finds a face, it executes this callback*/
 handleTrackingResults = function(brfv4, faces, d, img) {
+
   mainCanvas.draw(brfv4, faces, d, img);
 
+  /*P5's draw loop is turned off because this loop is running. Redraw updates the p5 canvas.*/
   d.redraw();
 };
