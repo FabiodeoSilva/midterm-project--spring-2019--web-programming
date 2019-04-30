@@ -1,18 +1,37 @@
 "use strict";
 
+/*remove face tracking canvas from page*/
 document.querySelector("canvas#_imageData").style.display = "none";
 
-class Screens {
+let webcamH = document.getElementById("_imageData").height;
+let webcamW = document.getElementById("_imageData").width;
+
+class Frame {
   constructor() {
     this.screens = [manyEyes];
+    this.currSec = 0;
     this.draw = this.screens[0];
+  }
+  setTimer() {
+    this.timer = setInterval(() => {
+      console.log(this.currSec);
+      this.currSec++;
+    }, 1000);
+  }
+  killTimer() {
+    clearInterval(this.timer);
+    this.currSec = 0;
+  }
+  init() {
+    this.setTimer();
   }
   rand() {
     this.draw = this.screens[Math.floor(Math.random() * this.screens.length)];
   }
 }
 
-let mainCanvas = new Screens();
+let mainCanvas = new Frame();
+mainCanvas.init();
 
 handleTrackingResults = function(brfv4, faces, d, img) {
   mainCanvas.draw(brfv4, faces, d, img);
@@ -20,16 +39,13 @@ handleTrackingResults = function(brfv4, faces, d, img) {
   d.redraw();
 };
 
-let webcamH = document.getElementById("_imageData").height;
-let webcamW = document.getElementById("_imageData").width;
-
-function getWebcamVid(faces, d, img) {
+let getWebcamVid = (faces, d, img) => {
   d.loadPixels();
   for (let i = 0; i <= img.length; i++) {
     d.pixels[i] = img[i];
   }
   d.updatePixels();
-}
+};
 
 function stopMouth(brfv4, faces, d, img) {
   basicAR(brfv4, faces, d, img, noMouth);
